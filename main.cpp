@@ -3,6 +3,7 @@
 #include "Test.h"
 using namespace std;
 int main() {
+	setlocale(0, "Russian");
 	Test();
 	List<int> a(10);
 
@@ -42,4 +43,16 @@ int main() {
 	for (size_t i = 0; i < s.size(); i++)
 		cout << s[i] << " ";
 	cout << "\n-------" << endl;
+
+	try {
+		cout << s[20];
+	}
+	catch (const char* er) {
+		cout << er;
+	}
+
+	cout << "\nIterator" << endl;
+	for (int i : s) {
+		cout << i << " ";
+	}
 }

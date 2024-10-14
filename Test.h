@@ -8,7 +8,7 @@
 void Test() {
 
 	List<int> a;
-
+	assert(a.size() == 0);
 	for (size_t i = 0; i < 8; i++)
 		a.add(i);
 
@@ -28,6 +28,7 @@ void Test() {
 	a.insert(a.size()-1, -5);
 	assert(a.size() == 11);
 	assert(a[a.size() - 2] == -5);
+
 
 	a.del(0);
 	assert(a[0] == 0);
@@ -59,7 +60,8 @@ void Test() {
 	for (size_t i = 0; i < b.size(); i++)
 		b[i] = i * 2;
 
-	List<int> s = a + b;
+	List<int> s;
+	 s = a + b;
 
 	assert(s.size() == 10 + 5);
 
@@ -70,4 +72,60 @@ void Test() {
 	s.clear();
 	a.clear();
 	b.clear();
+
+	List<int> m(8);
+
+	m[0] = 49;
+	m[1] = 1;
+	m[2] = -3;
+	m[3] = 0;
+	m[4] = 81;
+	m[5] = -100;
+	m[6] = 9;
+	m[7] = 11;
+
+	m.sort();
+
+	assert(m[0] == -100);
+	assert(m[1] == -3);
+	assert(m[2] == 0);
+	assert(m[3] == 1);
+	assert(m[4] == 9);
+	assert(m[5] == 11);
+	assert(m[6] == 49);
+	assert(m[7] == 81);
+
+	try {
+		s[20];
+		assert(0); // проверка если исключение не будет брошено
+	}
+	catch (const char* f) {
+		assert(f == "Ошибка доступа по индексу");
+	}
+
+	try {
+		s.del(0);
+		assert(0);
+	}
+	catch (const char* f) {
+		assert(f == "Список пуст");
+	}
+
+	List<int> it(8);
+
+	for (int i = 0; i < 8; i++) {
+		it[i] = i;
+	}
+
+	int j = 0;
+	for (int i : it) {
+		assert(i == j++);
+	}
+
+	it.add(8);
+
+	j = 0;
+	for (int i : it) {
+		assert(i == j++);
+	}
 }

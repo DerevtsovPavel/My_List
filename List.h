@@ -14,7 +14,7 @@ class List:InterfaceList<e> {
 
 		//меняем местами элементы 2х подмассивов от left до mid и от mid+1 до right
 		template <typename el>
-		void Merge(List<el> a, size_t left, size_t mid, size_t right) {
+		void Merge(List<el>& a, size_t left, size_t mid, size_t right) {
 			size_t n = right - left + 1; //кол-во обмениваемых элементов
 			size_t j = mid + 1;
 			size_t l = left;
@@ -42,7 +42,7 @@ class List:InterfaceList<e> {
 		}
 		///сортировка слиянием массива a. right - крайний правый индекс, left - левый индекс; average O(n log(n))
 		template <typename el>
-		void merge_sort(List<el> a, size_t right, size_t left = 0) {
+		void merge_sort(List<el>& a, size_t right, size_t left = 0) {
 			if (left >= right)
 				return;
 			size_t mid = (right + left) / 2;
@@ -51,6 +51,43 @@ class List:InterfaceList<e> {
 			merge_sort(a, right, mid + 1);
 			Merge(a, left, mid, right); //меняем местами элементы 2х подмассивов
 		}
+
+		///класс итератора по списку в стиле STL
+		class iterator {
+			Node<e>* current; //указатель, с помощью которого перемещаемся по списку
+		public:
+			iterator(Node<e>* c) { // конструктор с параметром
+				current = c;
+			}
+
+			///перегрузка оператора равно
+			bool operator == (const iterator& x) const {
+				return current == x.current;
+			}
+
+			///перегрузка оператора не равно
+			bool operator != (const iterator& x) const {
+				return current != x.current;
+			}
+
+			///перегрузка оператора доступа к данным
+			e& operator *() {
+				return current->data;
+			}
+
+			///перегрузка оператора постфиксный инкремент
+			iterator operator ++(e) {
+				iterator tmp(current);
+				current = current->next;
+				return tmp;
+			}
+
+			///перегрузка оператора префиксный инкремент
+			iterator operator ++() {
+				current = current->next;
+				return current;
+			}
+		};
 	
 	public:
 		///конструктор
@@ -73,17 +110,62 @@ class List:InterfaceList<e> {
 			
 		}
 		
-		/*
+		List(List<e>& b) {
+			for (size_t i = 0; i < b.size_l; i++)
+				(*this).add(b[i]);
+
+		}
+
+		List(List<e>&& b){
+			for (size_t i = 0; i < b.size_l; i++)
+				(*this).add(b[i]);
+		}
+		
 		~List() {
 			if (head != nullptr)
 				(*this).clear();
-		}*/
+		}
 
+		///итератор, указывающий на начало списка
+		iterator begin() {
+			return iterator(head);
+		}
+
+		///итератор, указывающий на конец списка
+		iterator end() {
+			return iterator(last->next);
+		}
 		e& operator [](size_t index) {
-			count = head;
-			for (size_t i = 0; i < index; i++)
-				count = count->next;
-			return count->data;
+			if (index > size_l or head == nullptr)
+				throw "Ошибка доступа по индексу";
+			else {
+				count = head;
+				for (size_t i = 0; i < index; i++)
+					count = count->next;
+				return count->data;
+			}
+		}
+
+		//оператор присваивания копированием
+		List<e>& operator = (List<e>& b) {
+			while ((*this).size() != 0) {
+				(*this).del(0);
+			}
+
+			for (size_t i = 0; i < b.size(); i++)
+				(*this).add(b[i]);
+			return *this;
+		}
+
+		//оператор присваивания перемещением
+		List<e>& operator = (List<e>&& b) {
+			while ((*this).size() != 0) {
+				(*this).del(0);
+			}
+
+			for (size_t i = 0; i < b.size(); i++)
+				(*this).add(b[i]);
+			return *this;
 		}
 
 		///вернёт размер списка
@@ -145,31 +227,35 @@ class List:InterfaceList<e> {
 
 		///удалить элемент с позиции del
 		void del(size_t index) override{
-			if (index == 0) { //удалить первыйй
-				Node<e>* a = head;
-				head = head->next;
-				delete a;
-			}
+			if (head == nullptr)
+				throw "Список пуст"; 
+			else {
+				if (index == 0) { //удалить первыйй
+					Node<e>* a = head;
+					head = head->next;
+					delete a;
+				}
 
-			else if (index == size_l) { //удалить последний
-				count = head;
-				for (size_t i = 0; i < index - 1; i++)
-					count = count->next;
-				Node<e>* a = count->next;
-				last = count;
-				last->next = nullptr;
-				delete a;
+				else if (index == size_l) { //удалить последний
+					count = head;
+					for (size_t i = 0; i < index - 1; i++)
+						count = count->next;
+					Node<e>* a = count->next;
+					last = count;
+					last->next = nullptr;
+					delete a;
+				}
+				else { //удалить из середины
+					count = head;
+					for (size_t i = 0; i < index - 1; i++)
+						count = count->next;
+					Node<e>* a = count->next;
+					count->next = a->next;
+					a->next = nullptr;
+					delete a;
+				}
+				size_l--;
 			}
-			else { //удалить из середины
-				count = head;
-				for (size_t i = 0; i < index - 1; i++)
-					count = count->next;
-				Node<e>* a = count->next;
-				count->next = a->next;
-				a->next = nullptr;
-				delete a;
-			}
-			size_l--;
 		}
 
 		///вернёт вектор из индексов, соответствующих эл-ту а
